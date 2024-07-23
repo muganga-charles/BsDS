@@ -101,7 +101,34 @@ par(mfrow = c(ceiling(sqrt(ncol(numeric_data))),ceiling(sqrt(ncol(numeric_data))
 for (i in 1:ncol(numeric_data)){
   boxplot(numeric_data[, i], main = colnames(numeric_data)[i])
 }
-
 # Relationships ----
+#cont vs cont - corr matrix, scatter plots
+#cont vs cat  - boxplots, ANOVA test
+#cat vs cat  - barplot, Chi square test
+## means(cont)  Shaipro- will
+
+## Target = Price (cont variable)
+categorical_variables <- cleaned_data %>% select_if(is.character) # grouping our cat data
+head(categorical_variables)
+
+perform_anova <- function(data, cont_var, cat_vars){ 
+  for (cat_var in cat_vars) {
+  anova_result <- aov(as.formula(paste(cont_var, '~', cat_var)), data = data)
+  summary_anova <- summary(anova_result)
+  p_value <-  summary_anova[[1]]["Pr(>F)"][1, ]
+  
+  if(p_value <= 0.05){
+    cat("Significant relationship found between ", cont_var, "and ", cat_var, "with a p value of :", p_value, "\n") # noilint
+  }
+  else{
+    cat("No significant rekationship found between ", cont_var, "and ", cat_var,  "with a p value of :", p_value, "\n") #nolint
+  }
+  }
+}
+
+perform_anova(data, "price", c("cut", "colour", "clarity", "P", "PC"))
+
+# cont | cat 
+
 ## cat and cat ----
 
