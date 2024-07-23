@@ -159,5 +159,3 @@ perform_chisq(cleaned_data, "cut", c("colour", "clarity", "P","PC"))
 ml_data <- cleaned_data[,!names(cleaned_data) %in% c("depth", "P", "PC")]
 head(ml_data)
 ml_data
-
-# Model building ----
