@@ -21,7 +21,7 @@ summary(data)
 
 ## Handling missing values ----
 ## Approach one
-missing_values <- sapply(data, function(x) sum(is.na(x)))
+missing_values <- sapply(numeric_data, function(x) sum(is.na(x)))
 missing_values
 
 ## Approach two
@@ -66,8 +66,8 @@ data$depth[is.na(data$depth)] <- mean(data$depth, na.rm = TRUE)
 
 #lines(density(data$price), col = "blue", lwd = 2)
 
-## OUTLIERS ----
-
+# OUTLIERS ----
+## Visualizing outliers ----
 numeric_data <- data %>% select_if(is.numeric)
 par(mfrow = c(ceiling(sqrt(ncol(numeric_data))),ceiling(sqrt(ncol(numeric_data)))))
 for (i in 1:ncol(numeric_data)){
@@ -77,17 +77,31 @@ for (i in 1:ncol(numeric_data)){
 data <- data[,!names(data) %in% c("ID")]
 head(data)
 
-#boxplot_gg <- function(data, columns){
-  #for (column in columns){
-    p <- ggplot(data = data, mapping = aes(x = "", y = .data[[column]])) + 
-        goem_boxplot()+
-        labs(title = paste("Boxplot for ", column))
-    print(p)
+## removing outliers
+removing_outliers <- function(data, columns) {
+  for (column in columns) {
+    #iqr_feature <- IQR(data[[column]])
+    quantiles <- quantile(data[[column]], probs = c(0.25, 0.75), na.rm = TRUE) # nolint
+    iqr_feature <- quantiles[2] - quantiles[1]
+    lower_boundary <- quantiles[1] - 1.5 * iqr_feature
+    upper_boundary <- quantiles[2] + 1.5 * iqr_feature
+    
+    data <- data[which((data[[column]] >= lower_boundary) & (data[[column]] <= upper_boundary)), ] # nolint
   }
-#}
-#boxplot_gg(data, c("carat", "depth", "price", "x", "y"))
+  
+  return(data)
+}
+
+cleaned_data <- remove_outliers(data, c("carat", "depth", "price", "x", "y"))
+
+## visualizing to outliers
+boxplot(cleaned_data$price)
+numeric_data <- cleaned_data %>% select_if(is.numeric)
+par(mfrow = c(ceiling(sqrt(ncol(numeric_data))),ceiling(sqrt(ncol(numeric_data)))))
+for (i in 1:ncol(numeric_data)){
+  boxplot(numeric_data[, i], main = colnames(numeric_data)[i])
+}
 
 # Relationships ----
 ## cat and cat ----
-
 
