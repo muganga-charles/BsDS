@@ -107,6 +107,7 @@ for (i in 1:ncol(numeric_data)){
 #cat vs cat  - barplot, Chi square test
 ## means(cont)  Shaipro- will
 
+#cont vs cat ----
 ## Target = Price (cont variable)
 categorical_variables <- cleaned_data %>% select_if(is.character) # grouping our cat data
 head(categorical_variables)
@@ -126,9 +127,37 @@ perform_anova <- function(data, cont_var, cat_vars){
   }
 }
 
-perform_anova(data, "price", c("cut", "colour", "clarity", "P", "PC"))
+perform_anova(cleaned_data, "price", c("cut", "colour", "clarity", "P", "PC"))
 
-# cont | cat 
+# cont vs cont ----
+## approach one
+correlation_matrix <- cor(numeric_data)
+correlation_matrix
+## Approach two
+pairs(cleaned_data[,c("price","depth", "x", "y", "carat")])
 
-## cat and cat ----
+## Approach three
+corrplot(correlation_matrix, method = "circle")
 
+#cat vs cat  ----
+perform_chisq <- function(data, cat_v1, cat_data){
+  for (cat_var2 in cat_data){
+    chisq_result <- chisq.test(table(cleaned_data[[cat_v1]],cleaned_data[[cat_var2]]))
+    p_value <- chisq_result$p.value
+    
+    if (p_value <= 0.05){
+      cat("Significant relationship found between", cat_v1, "and", cat_var2, "with pvalue: ", p_value, "\n")
+    }
+    else{
+      cat("Significant relationship not found between", cat_v1, "and", cat_var2, "with pvalue: ", p_value, "\n")
+    }
+  }
+}
+
+perform_chisq(cleaned_data, "cut", c("colour", "clarity", "P","PC"))
+
+ml_data <- cleaned_data[,!names(cleaned_data) %in% c("depth", "P", "PC")]
+head(ml_data)
+ml_data
+
+# Model building ----
